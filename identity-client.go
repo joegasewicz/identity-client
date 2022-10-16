@@ -18,11 +18,21 @@ type Identity struct {
 // a cookie & include this token in the headers, whilst trying to be as agnostic with
 // the returned data type as possible.
 //
-//	identity := Identity{
-//		URL: "http://127.0.01:5000/users",
-//		CookieName: "token",
-//	}
-//	data, err := identity.Get(r)
+//		identity := Identity{
+//			URL: "http://127.0.01:5000/users",
+//			CookieName: "token",
+//		}
+//		data, err := identity.Get(r)
+//	 if data == nil { // bail out here }
+//
+// Then you can cast each value to the expected type, for example
+//
+//	d := data.(map[string]interface{})
+//	var email := d["email"].(string)
+//
+// The data returned will be of the following type
+//
+//	map[string]interface{}
 func (i *Identity) Get(r *http.Request) (data interface{}, err error) {
 	req, err := http.NewRequest("GET", i.URL, nil)
 	if err != nil {
