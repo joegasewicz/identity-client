@@ -23,7 +23,7 @@ type Identity struct {
 //			CookieName: "token",
 //		}
 //		data, err := identity.Get(r)
-//	 if data == nil { // bail out here }
+//	 	if data == nil { // bail out here }
 //
 // Then you can cast each value to the expected type, for example
 //
