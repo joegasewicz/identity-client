@@ -15,7 +15,7 @@ type Identity struct {
 }
 
 // Get is a GET method client for remote api calls that takes a JWT token from
-// a cookie & include this token in the headers, whilst trying to be as agnostic with
+// a cookie & includes this token in the headers, whilst trying to be as agnostic with
 // the returned data type as possible.
 //
 //		identity := Identity{
