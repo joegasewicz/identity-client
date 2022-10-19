@@ -2,6 +2,7 @@ package identity_client
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -39,6 +40,9 @@ func (i *Identity) Get(r *http.Request) (data interface{}, err error) {
 		return nil, err
 	}
 	tokenCookie, err := r.Cookie(i.CookieName)
+	if tokenCookie == nil {
+		return nil, errors.New("No cookie with name " + i.CookieName)
+	}
 	token := fmt.Sprintf("Bearer %s", tokenCookie.Value)
 	req.Header.Set("Authorization", token)
 	client := &http.Client{}
