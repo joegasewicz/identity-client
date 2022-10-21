@@ -13,7 +13,8 @@ go get -u github.com/joegasewicz/identity-client
 ```go
 identity := Identity{
 	URL: "http://127.0.01:5000/users",
-	CookieName: "token",
+	CookieName: "token", // set to "" if a cookie is not required
+    Client &http.Client{} // Optional - useful for testing
 }
 data, err := identity.Get(r)
 // cast the data to your required entity type e.g.

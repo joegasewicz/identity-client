@@ -2,17 +2,24 @@ package identity_client
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 )
 
+type IClient interface {
+	Do(req *http.Request) (*http.Response, error)
+}
+
 // Identity defines the identity type
 type Identity struct {
-	URL        string
+	// URL is the url that the http request will be sent to (Required)
+	URL string
+	// CookieName is the name of the cookie key (Optional)
 	CookieName string
+	// Client is the http client (Optional)
+	Client IClient
 }
 
 // Get is a GET method client for remote api calls that takes a JWT token from
@@ -21,7 +28,8 @@ type Identity struct {
 //
 //		identity := Identity{
 //			URL: "http://127.0.01:5000/users",
-//			CookieName: "token",
+//			CookieName: "token", // set to "" if a cookie is not required
+//			Client &http.Client{} // Optional
 //		}
 //		data, err := identity.Get(r)
 //	 	if data == nil { // bail out here }
@@ -35,18 +43,23 @@ type Identity struct {
 //
 //	map[string]interface{}
 func (i *Identity) Get(r *http.Request) (data interface{}, err error) {
+	if i.Client == nil {
+		i.Client = &http.Client{}
+	}
 	req, err := http.NewRequest("GET", i.URL, nil)
 	if err != nil {
 		return nil, err
 	}
-	tokenCookie, err := r.Cookie(i.CookieName)
-	if tokenCookie == nil {
-		return nil, errors.New("No cookie with name " + i.CookieName)
+	if i.CookieName != "" {
+		tokenCookie, err := r.Cookie(i.CookieName)
+		if err != nil {
+			return nil, err
+		}
+		token := fmt.Sprintf("Bearer %s", tokenCookie.Value)
+		req.Header.Set("Authorization", token)
 	}
-	token := fmt.Sprintf("Bearer %s", tokenCookie.Value)
-	req.Header.Set("Authorization", token)
-	client := &http.Client{}
-	resp, err := client.Do(req)
+
+	resp, err := i.Client.Do(req)
 	if err != nil {
 		return nil, err
 	}
