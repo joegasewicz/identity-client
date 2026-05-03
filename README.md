@@ -28,6 +28,15 @@ data, err := identity.Get(r)
 jsonData := map[string]interface{}{"name": "John"}
 data, err := identity.Post(r, jsonData)
 ```
+#### Put
+```go
+jsonData := map[string]interface{}{"name": "John"}
+data, err := identity.Put(r, jsonData)
+```
+#### Delete
+```go
+data, err := identity.Delete(r)
+```
 
 The data returned will be of the following type
 ```go
