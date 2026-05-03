@@ -54,7 +54,7 @@ func (i *Identity) Get(r *http.Request) (data interface{}, err error) {
 	return i.request(r, "GET", nil)
 }
 
-// Post is a GET method client for remote api calls that takes a JWT token from
+// Post is a POST method client for remote api calls that takes a JWT token from
 // a cookie & includes this token in the headers, whilst trying to be as agnostic with
 // the returned data type as possible.
 //
@@ -71,13 +71,55 @@ func (i *Identity) Get(r *http.Request) (data interface{}, err error) {
 //
 //	map[string]interface{}
 func (i *Identity) Post(r *http.Request, jsonData map[string]interface{}) (data interface{}, err error) {
-	r.Header.Set("Content-Type", "application/json")
+	return i.jsonRequest(r, "POST", jsonData)
+}
+
+// Put is a PUT method client for remote api calls that takes a JWT token from
+// a cookie & includes this token in the headers, whilst trying to be as agnostic with
+// the returned data type as possible.
+//
+//		jsonData := map[string]interface{}{"name": "John"}
+//		data, err := identity.Put(r, jsonData)
+//	 	if data == nil { // bail out here }
+//
+// Then you can cast each value to the expected type, for example
+//
+//	d := data.(map[string]interface{})
+//	var email := d["email"].(string)
+//
+// The data returned will be of the following type
+//
+//	map[string]interface{}
+func (i *Identity) Put(r *http.Request, jsonData map[string]interface{}) (data interface{}, err error) {
+	return i.jsonRequest(r, "PUT", jsonData)
+}
+
+// Delete is a DELETE method client for remote api calls that takes a JWT token from
+// a cookie & includes this token in the headers, whilst trying to be as agnostic with
+// the returned data type as possible.
+//
+//		data, err := identity.Delete(r)
+//	 	if data == nil { // bail out here }
+//
+// Then you can cast each value to the expected type, for example
+//
+//	d := data.(map[string]interface{})
+//	var email := d["email"].(string)
+//
+// The data returned will be of the following type
+//
+//	map[string]interface{}
+func (i *Identity) Delete(r *http.Request) (data interface{}, err error) {
+	return i.request(r, "DELETE", nil)
+}
+
+func (i *Identity) jsonRequest(r *http.Request, method string, jsonData map[string]interface{}) (data interface{}, err error) {
 	j, err := json.Marshal(jsonData)
 	if err != nil {
 		return nil, err
 	}
 	b := bytes.NewBuffer(j)
-	return i.request(r, "POST", b)
+	return i.request(r, method, b)
 }
 
 func (i *Identity) request(r *http.Request, method string, jsonData *bytes.Buffer) (data interface{}, err error) {
@@ -94,6 +136,9 @@ func (i *Identity) request(r *http.Request, method string, jsonData *bytes.Buffe
 	}
 	if err != nil {
 		return nil, err
+	}
+	if jsonData != nil {
+		req.Header.Set("Content-Type", "application/json")
 	}
 	if i.CookieName != "" {
 		tokenCookie, err := r.Cookie(i.CookieName)
